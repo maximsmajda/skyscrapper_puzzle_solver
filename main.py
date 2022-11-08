@@ -1,5 +1,3 @@
-import time
-
 def print_board(board_to_print, size):
     for y in range(size):
         for x in range(size):
@@ -85,9 +83,9 @@ def fill_from_right(board, clue, row, size):
         board[row][size - 1 - x] = (size + 1) - clue + x
 
 
-def prefill_board(board, clues):
+def prefill_board(board, clues, size):
     for y in range(4):
-        for x in range(len(board)):
+        for x in range(size):
             if (clues[y][x] == size) or (clues[y][x] == 1):
                 if y == 0:
                     fill_from_top(board, clues[y][x], x, size)
@@ -179,49 +177,73 @@ def check_row_clues(board, clues, row):
     return (count_visible_left(board, row) == clues[2][row]) and (count_visible_right(board, row) == clues[3][row])
 
 
+def input_clues():
+    while True:
+        size = input("Enter size of board: ")
+        if size.isdigit():
+            size = int(size)
+            break
+        else:
+            print("Invalid size! Please enter number!")
+
+    print(f"Clues for {size}x{size} board")
+    clues = [[0 for i in range(size)] for j in range(4)]
+    for y in range(4):
+        if y == 0:
+            print("Enter top clues:")
+        elif y == 1:
+            print("Enter bottom clues:")
+        elif y == 2:
+            print("Enter left clues:")
+        elif y == 3:
+            print("Enter right clues:")
+        for x in range(size):
+            while True:
+                nb = input()
+                if nb.isdigit():
+                    nb = int(nb)
+                    if 0 < nb <= size:
+                        clues[y][x] = nb
+                        break
+                    else:
+                        print(f"Invalid input! Number is not in range {1} to {size}")
+                else:
+                    print("Please enter number!")
+    return clues
+
+
 if __name__ == '__main__':
-    start_time = time.time()
-    # clues = [[1, 2, 3, 3], [3, 3, 1, 2], [1, 2, 4, 2], [4, 2, 1, 2]]
-    clues = [[2, 4, 4, 3, 1, 2, 4, 4, 3], [4, 4, 3, 1, 3, 4, 2, 2, 4], [2, 1, 2, 4, 2, 3, 4, 5, 3], [2, 4, 2, 1, 5, 3, 2, 3, 3]]
-    # clues = [[2, 3, 1, 2, 3], [2, 2, 3, 2, 1], [2, 1, 2, 2, 2], [3, 5, 4, 2, 1]]
-    # clues = [[2, 4, 2, 3, 5, 1], [2, 2, 2, 3, 1, 4], [3, 1, 3, 3, 2, 2], [1, 4, 2, 2, 3, 2]]  # 6x6
+    # 9x9
+    # clues = [[2, 4, 4, 3, 1, 2, 4, 4, 3], [4, 4, 3, 1, 3, 4, 2, 2, 4], [2, 1, 2, 4, 2, 3, 4, 5, 3], [2, 4, 2, 1, 5, 3, 2, 3, 3]]
+    # board[0][2] = 3
+    # board[0][5] = 4
+    # board[0][7] = 2
+    # board[1][2] = 7
+    # board[1][3] = 8
+    # board[2][2] = 4
+    # board[2][3] = 6
+    # board[2][4] = 3
+    # board[2][6] = 5
+    # board[3][3] = 7
+    # board[3][4] = 2
+    # board[3][7] = 4
+    # board[4][0] = 6
+    # board[4][5] = 8
+    # board[5][0] = 2
+    # board[5][5] = 5
+    # board[5][6] = 3
+    # board[6][5] = 2
+    # board[6][8] = 1
+    # # board[7][1] = 3
+    # # board[7][2] = 6
+
+    clues = input_clues()
     size = len(clues[0])
     board = init_board(size)
-    prefill_board(board, clues)
-
-    #6x6
-    # board[0][4] = 2
-    # board[2][5] = 2
-    # board[3][2] = 6
-    # board[3][4] = 4
-    # board[5][2] = 2
-    # board[5][5] = 3
-
-    #9x9
-    board[0][2] = 3
-    board[0][5] = 4
-    board[0][7] = 2
-    board[1][2] = 7
-    board[1][3] = 8
-    board[2][2] = 4
-    board[2][3] = 6
-    board[2][4] = 3
-    board[2][6] = 5
-    board[3][3] = 7
-    board[3][4] = 2
-    board[3][7] = 4
-    board[4][0] = 6
-    board[4][5] = 8
-    board[5][0] = 2
-    board[5][5] = 5
-    board[5][6] = 3
-    board[6][5] = 2
-    board[6][8] = 1
-    # board[7][1] = 3
-    # board[7][2] = 6
-
-
-
-
-    print_board(solve(board, clues, size), size)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    prefill_board(board, clues, size)
+    solution = solve(board, clues, size)
+    if solution is None:
+        print("Puzzle not possible with given clues:(")
+    else:
+        print("Solution")
+        print_board(solution, size)
