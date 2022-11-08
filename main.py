@@ -8,8 +8,7 @@ def print_board(board_to_print, size):
 
 # initialize empty board full o zeroes of given size
 def init_board(board_size):
-    new_board = [[0 for i in range(board_size)] for j in range(board_size)]
-    return new_board
+    return [[0 for i in range(board_size)] for j in range(board_size)]
 
 
 # ---------------------------------------------
@@ -17,22 +16,38 @@ def init_board(board_size):
 # ---------------------------------------------
 def fill_from_top(board, clue, column, size):
     for y in range(clue):
-        board[y][column] = (size + 1) - clue + y
+        nb = (size + 1) - clue + y
+        board[y][column] = nb
+        if nb_in_row(board, y, column, nb) or nb_in_col(board, y, column, nb):
+            return None
+    return board
 
 
 def fill_from_bottom(board, clue, column, size):
     for y in range(clue):
-        board[size - 1 - y][column] = (size + 1) - clue + y
+        nb = (size + 1) - clue + y
+        board[size - 1 - y][column] = nb
+        if nb_in_row(board, size - 1 - y, column, nb) or nb_in_col(board, size - 1 - y, column, nb):
+            return None
+    return board
 
 
 def fill_from_left(board, clue, row, size):
     for x in range(clue):
-        board[row][x] = (size + 1) - clue + x
+        nb = (size + 1) - clue + x
+        board[row][x] = nb
+        if nb_in_row(board, row, x, nb) or nb_in_col(board, row, x, nb):
+            return None
+    return board
 
 
 def fill_from_right(board, clue, row, size):
     for x in range(clue):
-        board[row][size - 1 - x] = (size + 1) - clue + x
+        nb = (size + 1) - clue + x
+        board[row][size - 1 - x] = nb
+        if nb_in_row(board, row, size - 1 - x, nb) or nb_in_col(board, row, size - 1 - x, nb):
+            return None
+    return board
 
 
 # quickly fill boxes that are under 1 or size clue
@@ -41,16 +56,18 @@ def prefill_board(board, clues, size):
         for x in range(size):
             if (clues[y][x] == size) or (clues[y][x] == 1):
                 if y == 0:  # top clues
-                    fill_from_top(board, clues[y][x], x, size)
+                    if fill_from_top(board, clues[y][x], x, size) is None:
+                        return None
                 elif y == 1:  # bottom clues
-                    fill_from_bottom(board, clues[y][x], x, size)
+                    if fill_from_bottom(board, clues[y][x], x, size) is None:
+                        return None
                 elif y == 2:  # left clues
-                    fill_from_left(board, clues[y][x], x, size)
+                    if fill_from_left(board, clues[y][x], x, size) is None:
+                        return None
                 elif y == 3:  # right clues
-                    fill_from_right(board, clues[y][x], x, size)
-
-# ---------------------------------------------
-
+                    if fill_from_right(board, clues[y][x], x, size) is None:
+                        return None
+    return board
 
 # ----------------------------------------------
 # ------------- checking functions -------------
@@ -235,15 +252,24 @@ def input_clues():
     return clues
 
 
-if __name__ == '__main__':
+def puzzle_solver():
     clues = input_clues()
     size = len(clues[0])
     board = init_board(size)
-    prefill_board(board, clues, size)
-
-    solution = solve(board, clues, size)
-    if solution is None:
+    prefilled = prefill_board(board, clues, size)
+    if prefilled is None:
         print("Puzzle not possible with given clues :(")
     else:
-        print("Solution")
-        print_board(solution, size)
+        solution = solve(prefilled, clues, size)
+        if solution is None:
+            print("Puzzle not possible with given clues :(")
+        else:
+            print("Solution")
+            print_board(solution, size)
+
+
+if __name__ == '__main__':
+    another = 'y'
+    while another == 'y':
+        puzzle_solver()
+        another = input("Do you want to solve another? Press y for another, any key otherwise\n")
